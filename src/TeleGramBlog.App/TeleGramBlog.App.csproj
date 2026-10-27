@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>TeleGramBlog.App</RootNamespace>
+    <UseMaui>true</UseMaui><SingleProject>true</SingleProject>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <ApplicationTitle>TeleGramBlog</ApplicationTitle>
+    <ApplicationId>app.telegramblog.desktop</ApplicationId>
+    <ApplicationDisplayVersion>1.7.2</ApplicationDisplayVersion><ApplicationVersion>11</ApplicationVersion>
+    <WindowsPackageType>None</WindowsPackageType>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <MauiVersion>10.0.1</MauiVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <MauiIcon Include="Resources/AppIcon/appicon.svg" Color="#087DFA" />
+    <MauiSplashScreen Include="Resources/Splash/splash.svg" Color="#F5FAFF" BaseSize="128,128" />
+    <MauiImage Include="Resources/Images/*" />
+    <MauiFont Include="Resources/Fonts/*" />
+    <MauiAsset Include="Resources/Raw/**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+    <ProjectReference Include="../TeleGramBlog.Core/TeleGramBlog.Core.csproj" />
+    <ProjectReference Include="../TeleGramBlog.Telegram/TeleGramBlog.Telegram.csproj" />
+  </ItemGroup>
+</Project>

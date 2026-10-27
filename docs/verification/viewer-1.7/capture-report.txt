@@ -1,0 +1,13 @@
+viewer-1280.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+details-1280.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+viewer-1920.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+details-1920.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+zoomed.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+video.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+portrait.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+square-fixture.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+details-narrow.png: 1082x851px, native content 866x681 DIP, display scale 125%
+loading-fixture.png: 1082x851px, native content 866x681 DIP, display scale 125%
+error-fixture.png: 1082x851px, native content 866x681 DIP, display scale 125%
+single.png: 1082x851px, native content 866x681 DIP, display scale 125%
+long-filmstrip-fixture.png: 1082x851px, native content 866x681 DIP, display scale 125%

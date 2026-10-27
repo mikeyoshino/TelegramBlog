@@ -1,0 +1,7 @@
+{
+  "src/TeleGramBlog.App/Views/MediaCardView.cs": "68f648e82bcf24f077fb0125ebd7442e8fd5f58e196d97fe42276486db655628",
+  "src/TeleGramBlog.App/Views/PostDetailsPage.cs": "37042c906d7b3584cd735d1b6a04cd13ee09966f516992a6ff269ce750ce1439",
+  "src/TeleGramBlog.App/Views/VideoPlayerView.cs": "49669940cefbfcf32b55cc1008e3b0c5acd97b9d23ed29e479393e25874a9ccf",
+  "src/TeleGramBlog.App/Platforms/Windows/VideoPlayerHandler.cs": "f4351c1ded097fae67e52deb2b4c6501abbfddfa7b54d3a65e43e9cba45fdf72",
+  "src/TeleGramBlog.App/App.xaml": "f58b691b319025bf5d4fd469add1be8ef2ef04b49b3afdead5b476ae7f9f7651"
+}

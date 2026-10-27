@@ -1,0 +1,24 @@
+**/bin/
+**/obj/
+.packages/
+.research/
+.superpowers/
+artifacts/
+telegram.json
+*.session
+*.session.*
+*.user
+
+# Local IDE state, credentials, signing files and generated UI dumps
+.vs/
+.idea/
+.DS_Store
+**/.DS_Store
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.mobileprovision
+scripts/login-ui.json
+scripts/preview-ui.json

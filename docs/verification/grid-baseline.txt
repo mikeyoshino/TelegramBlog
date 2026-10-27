@@ -1,0 +1,6 @@
+(object? sender,EventArgs e)
+    {
+        if(PostGrid.Width<=0)return;
+        PostLayout.Span=PostGrid.Width>=1400?4:PostGrid.Width>=1000?3:PostGrid.Width>=620?2:1;
+        foreach(var card in visibleCards)card.SetCardWidth((PostGrid.Width-(PostLayout.Span-1)*16)/PostLayout.Span);
+    }

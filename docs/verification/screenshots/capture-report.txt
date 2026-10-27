@@ -1,0 +1,16 @@
+groups-1280.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+overview-1280.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+posts-1280.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+groups-1440.png: 1782x1076px, native content 1426x861 DIP, display scale 125%
+overview-1440.png: 1782x1076px, native content 1426x861 DIP, display scale 125%
+posts-1440.png: 1782x1076px, native content 1426x861 DIP, display scale 125%
+groups-1920.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+overview-1920.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+posts-1920.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%
+search-empty.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+stress-groups-top.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+stress-groups-last.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+stress-topics-top.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+stress-topics-last.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+topics-empty.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+groups-empty.png: 1582x851px, native content 1266x681 DIP, display scale 125%

@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TeleGramBlog.App/TeleGramBlog.App.csproj" />
+    <Project Path="src/TeleGramBlog.Core/TeleGramBlog.Core.csproj" />
+    <Project Path="src/TeleGramBlog.Telegram/TeleGramBlog.Telegram.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TeleGramBlog.Tests/TeleGramBlog.Tests.csproj" />
+  </Folder>
+</Solution>

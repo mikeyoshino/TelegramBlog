@@ -1,0 +1,22 @@
+PASS: Stage expands and 96 DIP filmstrip remains visible at 1280
+PASS: Details closed by default at 1280
+PASS: Native keyboard listener attached at 1280
+PASS: Stage expands and 96 DIP filmstrip remains visible at 1920
+PASS: Details closed by default at 1920
+PASS: Native keyboard listener attached at 1920
+PASS: Zoom reaches 2x
+PASS: Fit resets zoom
+PASS: Image tools hidden for video
+PASS: No wrapping at final media
+PASS: Narrow details overlay preserves stage width
+PASS: Decode failure shows retry
+PASS: Successful retry removes error controls
+PASS: Rapid photo/video/photo selection ends on latest photo
+PASS: Full screen enters
+PASS: Full screen exits
+PASS: Exit releases video
+PASS: Singleton mounted in native navigation
+PASS: Singleton hides filmstrip and arrows
+PASS: Long strip mounted in native navigation
+PASS: Long strip scrolls selected last thumbnail into view
+PASS: No-media post has no perpetual loading or navigation

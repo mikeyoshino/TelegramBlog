@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="TeleGramBlog.App.App">
+ <Application.Resources>
+  <Style TargetType="ContentPage"><Setter Property="BackgroundColor" Value="White"/></Style>
+  <Style TargetType="Label"><Setter Property="TextColor" Value="#13243A"/><Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="FontSize" Value="14"/></Style>
+  <Style TargetType="Button"><Setter Property="BackgroundColor" Value="#EDF5FF"/><Setter Property="TextColor" Value="#087DFA"/><Setter Property="CornerRadius" Value="6"/><Setter Property="FontSize" Value="13"/><Setter Property="Padding" Value="14,8"/><Setter Property="MinimumHeightRequest" Value="38"/></Style>
+  <Style x:Key="Primary" TargetType="Button"><Setter Property="BackgroundColor" Value="#087DFA"/><Setter Property="TextColor" Value="White"/><Setter Property="CornerRadius" Value="6"/><Setter Property="Padding" Value="20,12"/><Setter Property="FontSize" Value="14"/></Style>
+  <Style TargetType="Entry"><Setter Property="TextColor" Value="#13243A"/><Setter Property="PlaceholderColor" Value="#8090A4"/><Setter Property="BackgroundColor" Value="#F7FAFD"/><Setter Property="FontSize" Value="14"/><Setter Property="MinimumHeightRequest" Value="44"/></Style>
+  <Style TargetType="SearchBar"><Setter Property="TextColor" Value="#13243A"/><Setter Property="PlaceholderColor" Value="#8090A4"/><Setter Property="BackgroundColor" Value="#F7FAFD"/><Setter Property="FontSize" Value="13"/></Style>
+  <Style TargetType="Border"><Setter Property="Stroke" Value="#E3EAF2"/><Setter Property="StrokeShape" Value="RoundRectangle 6"/></Style>
+  <Style x:Key="MutedText" TargetType="Label"><Setter Property="TextColor" Value="#64758B"/><Setter Property="FontSize" Value="12"/></Style>
+ </Application.Resources>
+</Application>

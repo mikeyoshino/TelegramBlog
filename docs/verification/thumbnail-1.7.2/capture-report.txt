@@ -1,0 +1,2 @@
+cards-1280.png: 1582x851px, native content 1266x681 DIP, display scale 125%
+cards-1920.png: 2382x1301px, native content 1906x1041 DIP, display scale 125%

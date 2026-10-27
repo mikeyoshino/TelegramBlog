@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+ xmlns:views="clr-namespace:TeleGramBlog.App.Views" xmlns:vm="clr-namespace:TeleGramBlog.App.ViewModels" xmlns:core="clr-namespace:TeleGramBlog.Core;assembly=TeleGramBlog.Core"
+ x:Class="TeleGramBlog.App.MainPage" x:DataType="vm:MainViewModel" NavigationPage.HasNavigationBar="False" BackgroundColor="White">
+ <ContentPage.Resources>
+  <Style x:Key="ShellText" TargetType="Label"><Setter Property="FontFamily" Value="Leelawadee UI"/><Setter Property="FontSize" Value="14"/><Setter Property="TextColor" Value="#26364A"/></Style>
+  <Style x:Key="ShellMuted" TargetType="Label" BasedOn="{StaticResource ShellText}"><Setter Property="FontSize" Value="12"/><Setter Property="TextColor" Value="#5D6E83"/></Style>
+  <Style x:Key="ShellTitle" TargetType="Label" BasedOn="{StaticResource ShellText}"><Setter Property="FontSize" Value="24"/><Setter Property="FontAttributes" Value="Bold"/></Style>
+  <Style x:Key="ShellButton" TargetType="Button"><Setter Property="FontFamily" Value="Leelawadee UI"/><Setter Property="FontSize" Value="13"/><Setter Property="HeightRequest" Value="38"/><Setter Property="MinimumHeightRequest" Value="38"/><Setter Property="Padding" Value="12,0"/><Setter Property="BackgroundColor" Value="#EAF2FC"/><Setter Property="TextColor" Value="#1265B5"/><Setter Property="CornerRadius" Value="6"/></Style>
+  <Style x:Key="ShellCrumb" TargetType="Button" BasedOn="{StaticResource ShellButton}"><Setter Property="BackgroundColor" Value="Transparent"/><Setter Property="Padding" Value="4,0"/><Setter Property="FontSize" Value="12"/></Style>
+  <Style x:Key="ShellSearch" TargetType="SearchBar"><Setter Property="FontFamily" Value="Leelawadee UI"/><Setter Property="FontSize" Value="13"/><Setter Property="HeightRequest" Value="38"/><Setter Property="MinimumHeightRequest" Value="38"/><Setter Property="BackgroundColor" Value="White"/><Setter Property="TextColor" Value="#26364A"/><Setter Property="PlaceholderColor" Value="#6B7A8E"/></Style>
+ </ContentPage.Resources>
+ <Grid RowDefinitions="*">
+  <Grid IsVisible="{Binding IsLogin}" ColumnDefinitions="0.85*,1.15*">
+   <Grid BackgroundColor="#F0F7FF" Padding="48" RowDefinitions="Auto,*,Auto">
+    <HorizontalStackLayout Spacing="10"><Label Text="◈" TextColor="#087DFA" FontSize="28"/><Label Text="TeleGramBlog" FontSize="20" FontAttributes="Bold" VerticalOptions="Center"/></HorizontalStackLayout>
+    <VerticalStackLayout Grid.Row="1" VerticalOptions="Center" Spacing="22">
+     <Label Text="A little less scrolling.&#10;A lot more discovery." FontSize="38" FontAttributes="Bold" LineHeight="1.15"/>
+     <Label Text="Give your conversations room to breathe." TextColor="#64758B" FontSize="17"/>
+     <Grid ColumnDefinitions="*,*" RowDefinitions="100,100" ColumnSpacing="14" RowSpacing="14" Margin="0,20,0,0">
+      <Border BackgroundColor="#D9EBFF" StrokeThickness="0" Padding="18"><VerticalStackLayout><Label Text="01" TextColor="#087DFA"/><Label Text="Your groups" FontSize="18" Margin="0,10,0,0"/></VerticalStackLayout></Border>
+      <Border Grid.Column="1" BackgroundColor="White" StrokeThickness="0" Padding="18"><VerticalStackLayout><Label Text="02" TextColor="#087DFA"/><Label Text="Your topics" FontSize="18" Margin="0,10,0,0"/></VerticalStackLayout></Border>
+      <Border Grid.Row="1" Grid.ColumnSpan="2" BackgroundColor="White" StrokeThickness="0" Padding="18"><VerticalStackLayout><Label Text="03" TextColor="#087DFA"/><Label Text="Everything worth coming back to." FontSize="18" Margin="0,10,0,0"/></VerticalStackLayout></Border>
+     </Grid>
+    </VerticalStackLayout>
+    <Label Grid.Row="2" Text="A personal viewer for Telegram" Style="{StaticResource MutedText}"/>
+   </Grid>
+   <ScrollView Grid.Column="1" BackgroundColor="White"><VerticalStackLayout MaximumWidthRequest="430" Padding="28,30" Spacing="14" VerticalOptions="Center">
+    <Label Text="YOUR PERSONAL LIBRARY" TextColor="#087DFA" FontSize="11" CharacterSpacing="2"/>
+    <Label Text="{Binding LoginTitle}" FontSize="32" FontAttributes="Bold"/>
+    <Label Text="{Binding LoginDescription}" TextColor="#64758B" LineHeight="1.3" Margin="0,0,0,12"/>
+    <VerticalStackLayout IsVisible="{Binding ShowQrPanel}" Spacing="12">
+     <Border WidthRequest="220" HeightRequest="220" Padding="8" BackgroundColor="White" HorizontalOptions="Center">
+      <Grid>
+       <VerticalStackLayout IsVisible="{Binding ShowQrPlaceholder}" HorizontalOptions="Center" VerticalOptions="Center" Spacing="10"><Label Text="▦" FontSize="56" TextColor="#087DFA" HorizontalOptions="Center"/><Label Text="Connect to get your QR" FontSize="12" TextColor="#64758B"/></VerticalStackLayout>
+       <Image x:Name="QrImage" IsVisible="{Binding ShowQrImage}" Aspect="AspectFit" SemanticProperties.Description="Telegram sign-in QR code"/>
+      </Grid>
+     </Border>
+     <Label Text="{Binding QrStatus}" FontSize="11" TextColor="#64758B" HorizontalTextAlignment="Center"/>
+     <Label Text="1. Open Telegram on your phone&#10;2. Go to Settings → Devices → Link Desktop Device&#10;3. Scan this QR code and confirm" FontSize="13" TextColor="#475D76" LineHeight="1.3"/>
+    </VerticalStackLayout>
+    <Entry IsVisible="{Binding ShowLoginInput}" Text="{Binding LoginInput}" Placeholder="{Binding InputHint}" IsPassword="{Binding PasswordInput}" IsEnabled="{Binding CanSubmitLogin}" ReturnType="Go" Completed="ConnectClicked"/>
+    <Button Text="{Binding ConnectLabel}" Style="{StaticResource Primary}" Clicked="ConnectClicked" IsVisible="{Binding ShowConnectButton}" IsEnabled="{Binding CanSubmitLogin}"/>
+    <Button Text="{Binding SwitchLoginLabel}" Clicked="SwitchLoginClicked" BackgroundColor="White" BorderWidth="0"/>
+    <Label Text="Your session stays on this Windows account. TeleGramBlog does not send or change your messages." Style="{StaticResource MutedText}" LineHeight="1.3"/>
+    <BoxView HeightRequest="1" Color="#E3EAF2" Margin="0,10"/>
+    <Button Text="Explore the design preview   →" Clicked="PreviewClicked" BackgroundColor="Transparent" IsEnabled="{Binding IsReady}"/>
+    <Button Text="Restart sign-in" Clicked="RestartClicked" BackgroundColor="White" BorderWidth="0" TextColor="#64758B"/>
+    <Label Text="{Binding Error}" IsVisible="{Binding HasError}" TextColor="#805421"/>
+   </VerticalStackLayout></ScrollView>
+  </Grid>
+  <Grid IsVisible="{Binding IsConnected}" RowDefinitions="56,*,Auto" BackgroundColor="#F5F7FA">
+   <Grid Padding="20,8" ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="16" BackgroundColor="White">
+    <Label Text="TeleGramBlog" FontSize="18" FontAttributes="Bold" VerticalOptions="Center"/>
+    <BoxView Grid.Column="1" Color="#E2E8F0" WidthRequest="1" Margin="0,6"/>
+    <Label Grid.Column="2" Text="{Binding LocationLabel}" Style="{StaticResource ShellText}" MaxLines="1" LineBreakMode="TailTruncation" VerticalOptions="Center"/>
+    <Button Grid.Column="3" Text="{Binding AccountName,StringFormat='บัญชี · {0}  ⌄'}" Style="{StaticResource ShellButton}" Clicked="AccountClicked" SemanticProperties.Description="เมนูบัญชี" ToolTipProperties.Text="เมนูบัญชี"/>
+    <BoxView Grid.ColumnSpan="4" HeightRequest="1" Color="#E2E8F0" VerticalOptions="End" Margin="-20,0,-20,-8" InputTransparent="True"/>
+   </Grid>
+   <Grid Grid.Row="1" x:Name="BrowserColumns" ColumnDefinitions="72,0,*">
+    <Grid Padding="8,12" RowDefinitions="44,1,*" RowSpacing="12" BackgroundColor="#EDF2F8">
+     <Button Text="▦" FontSize="22" Style="{StaticResource ShellButton}" Clicked="GroupsClicked" SemanticProperties.Description="กลุ่มทั้งหมด" ToolTipProperties.Text="กลุ่มทั้งหมด"/>
+     <BoxView Grid.Row="1" HeightRequest="1" Color="#DCE4EE"/>
+     <CollectionView Loaded="ShellListLoaded" Grid.Row="2" ItemsSource="{Binding RailGroups}" SelectionMode="None">
+      <CollectionView.ItemsLayout><LinearItemsLayout Orientation="Vertical" ItemSpacing="8"/></CollectionView.ItemsLayout>
+      <CollectionView.ItemTemplate><DataTemplate x:DataType="core:GroupInfo">
+       <Grid WidthRequest="56" HeightRequest="52">
+        <Border Padding="0" Margin="4" StrokeThickness="0" BackgroundColor="{Binding AvatarColor}">
+         <Grid><Label Text="{Binding Initial}" FontSize="19" TextColor="#385572" HorizontalOptions="Center" VerticalOptions="Center"/><Image Source="{Binding AvatarPath}" IsVisible="{Binding HasAvatar}" Aspect="AspectFit"/></Grid>
+        </Border>
+        <BoxView IsVisible="{Binding IsSelected}" WidthRequest="3" Color="#087DFA" HorizontalOptions="Start" Margin="0,8"/>
+        <Button Text="" BackgroundColor="Transparent" BorderWidth="1" BorderColor="{Binding SelectionColor}" CornerRadius="8" Padding="0" Clicked="GroupButtonClicked" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Title}" ToolTipProperties.Text="{Binding Title}"/>
+       </Grid>
+      </DataTemplate></CollectionView.ItemTemplate>
+     </CollectionView>
+    </Grid>
+    <Grid Grid.Column="1" x:Name="TopicSidebar" IsVisible="{Binding HasTopicSidebar}" Padding="16,16,12,12" RowDefinitions="Auto,38,*,Auto" RowSpacing="12" BackgroundColor="White">
+     <VerticalStackLayout Spacing="12">
+      <Button Text="‹  กลุ่มทั้งหมด" Style="{StaticResource ShellButton}" Clicked="GroupsClicked" HorizontalOptions="Start"/>
+      <Grid ColumnDefinitions="40,*" ColumnSpacing="10">
+       <Border BackgroundColor="{Binding SelectedGroup.AvatarColor}" WidthRequest="40" HeightRequest="40" Padding="0" StrokeThickness="0"><Grid><Label Text="{Binding SelectedGroup.Initial}" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/><Image Source="{Binding SelectedGroup.AvatarPath}" Aspect="AspectFit" IsVisible="{Binding SelectedGroup.HasAvatar}"/></Grid></Border>
+       <VerticalStackLayout Grid.Column="1" Spacing="4"><Label Text="{Binding GroupTitle}" FontSize="15" FontAttributes="Bold" MaxLines="2" LineBreakMode="TailTruncation" ToolTipProperties.Text="{Binding GroupTitle}"/><Label Text="{Binding TopicCount}" Style="{StaticResource ShellMuted}"/></VerticalStackLayout>
+      </Grid>
+      <Button Text="ภาพรวมกลุ่ม" Style="{StaticResource ShellButton}" Clicked="OverviewClicked"/>
+     </VerticalStackLayout>
+     <SearchBar Grid.Row="1" Text="{Binding TopicQuery}" Placeholder="ค้นหาหัวข้อ" Style="{StaticResource ShellSearch}"/>
+     <CollectionView Loaded="ShellListLoaded" Grid.Row="2" x:Name="TopicList" ItemsSource="{Binding Topics}" SelectionMode="Single" SelectedItem="{Binding SelectedTopic,Mode=OneWay}" Scrolled="TopicListScrolled">
+      <CollectionView.ItemsLayout><LinearItemsLayout Orientation="Vertical" ItemSpacing="4"/></CollectionView.ItemsLayout>
+      <CollectionView.ItemTemplate><DataTemplate x:DataType="core:TopicInfo">
+       <Grid HeightRequest="44" Padding="8,0" ColumnDefinitions="22,*">
+        <VisualStateManager.VisualStateGroups><VisualStateGroup Name="CommonStates"><VisualState Name="Normal"><VisualState.Setters><Setter Property="BackgroundColor" Value="White"/></VisualState.Setters></VisualState><VisualState Name="Selected"><VisualState.Setters><Setter Property="BackgroundColor" Value="#DDEEFF"/></VisualState.Setters></VisualState></VisualStateGroup></VisualStateManager.VisualStateGroups>
+        <Label Text="#" TextColor="{Binding IconTint}" VerticalOptions="Center" FontSize="16"/><Label Grid.Column="1" Text="{Binding Title}" Style="{StaticResource ShellText}" MaxLines="1" LineBreakMode="TailTruncation" VerticalOptions="Center"/>
+        <Button Grid.ColumnSpan="2" Text="" BorderWidth="0" BackgroundColor="Transparent" Padding="0" Clicked="TopicButtonClicked" CommandParameter="{Binding .}" ToolTipProperties.Text="{Binding Title}" SemanticProperties.Description="{Binding Title}"/>
+       </Grid>
+      </DataTemplate></CollectionView.ItemTemplate>
+     </CollectionView>
+     <Label Grid.Row="3" Text="{Binding ConnectionLabel}" Style="{StaticResource ShellMuted}" MaxLines="2"/>
+    </Grid>
+    <BoxView Grid.Column="1" IsVisible="{Binding HasTopicSidebar}" HorizontalOptions="End" WidthRequest="1" Color="#E2E8F0"/>
+    <Grid Grid.Column="2" Padding="28,16,28,12" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
+     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+      <Button Text="☰" Style="{StaticResource ShellButton}" IsVisible="{Binding HasTopicSidebar}" Clicked="ToggleTopicsClicked" SemanticProperties.Description="ยุบหรือขยายหัวข้อ" ToolTipProperties.Text="ยุบหรือขยายหัวข้อ"/>
+      <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+       <Button Text="กลุ่มของฉัน" Style="{StaticResource ShellCrumb}" Clicked="GroupsClicked"/>
+       <Label Text="/" IsVisible="{Binding IsWorkspace}" Style="{StaticResource ShellMuted}" VerticalOptions="Center"/>
+       <Button Text="ภาพรวมกลุ่ม" Style="{StaticResource ShellCrumb}" IsVisible="{Binding HasTopicSidebar}" Clicked="OverviewClicked"/>
+      </HorizontalStackLayout>
+      <Label Grid.Column="2" Text="ตัวอย่างการออกแบบ" IsVisible="{Binding IsDemo}" Style="{StaticResource ShellMuted}" VerticalOptions="Center"/>
+     </Grid>
+     <Grid Grid.Row="1" IsVisible="{Binding IsGroupPicker}" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+      <HorizontalStackLayout Spacing="12"><Label Text="กลุ่มของฉัน" Style="{StaticResource ShellTitle}"/><Label Text="{Binding GroupCount}" Style="{StaticResource ShellMuted}" VerticalOptions="Center"/></HorizontalStackLayout>
+      <Button Grid.Column="1" Text="↻  รีเฟรชรายการกลุ่ม" Style="{StaticResource ShellButton}" Clicked="RefreshClicked" IsEnabled="{Binding IsReady}"/>
+     </Grid>
+     <SearchBar Grid.Row="2" IsVisible="{Binding IsGroupPicker}" Text="{Binding GroupQuery}" Placeholder="ค้นหากลุ่มที่เข้าร่วม…" Style="{StaticResource ShellSearch}"/>
+     <Grid Grid.Row="3" IsVisible="{Binding IsGroupPicker}">
+      <CollectionView x:Name="GroupGrid" ItemsSource="{Binding Groups}" SelectionMode="None" SizeChanged="GroupGridSizeChanged" Scrolled="GroupGridScrolled">
+       <CollectionView.ItemsLayout><GridItemsLayout x:Name="GroupLayout" Orientation="Vertical" Span="3" HorizontalItemSpacing="12" VerticalItemSpacing="12"/></CollectionView.ItemsLayout>
+       <CollectionView.ItemTemplate><DataTemplate x:DataType="core:GroupInfo">
+        <Border Padding="12" HeightRequest="100" BackgroundColor="White" Stroke="#E2E8F0">
+         <Grid ColumnDefinitions="48,*,16" ColumnSpacing="12">
+          <Border BackgroundColor="{Binding AvatarColor}" WidthRequest="48" HeightRequest="48" Padding="0" StrokeThickness="0" VerticalOptions="Center"><Grid><Label Text="{Binding Initial}" FontSize="22" TextColor="#385572" HorizontalOptions="Center" VerticalOptions="Center"/><Image Source="{Binding AvatarPath}" IsVisible="{Binding HasAvatar}" Aspect="AspectFit"/></Grid></Border>
+          <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4"><Label Text="{Binding Title}" FontSize="15" FontAttributes="Bold" MaxLines="2" LineBreakMode="TailTruncation"/><Label Text="{Binding GroupMeta}" Style="{StaticResource ShellMuted}"/></VerticalStackLayout>
+          <Label Grid.Column="2" Text="›" FontSize="22" TextColor="#6C8199" VerticalOptions="Center"/>
+          <Button Grid.ColumnSpan="3" Text="" BorderWidth="0" Margin="-12" BackgroundColor="Transparent" Clicked="GroupButtonClicked" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Title}" ToolTipProperties.Text="{Binding Title}"/>
+         </Grid>
+        </Border>
+       </DataTemplate></CollectionView.ItemTemplate>
+      </CollectionView>
+      <VerticalStackLayout IsVisible="{Binding ShowGroupsEmpty}" HorizontalOptions="Center" VerticalOptions="Center" Spacing="12"><Label Text="{Binding GroupsEmptyText}" Style="{StaticResource ShellText}"/><Button Text="ล้างคำค้น" Style="{StaticResource ShellButton}" Clicked="ClearGroupSearchClicked"/></VerticalStackLayout>
+     </Grid>
+     <Grid Grid.Row="1" IsVisible="{Binding IsOverview}" ColumnDefinitions="56,*" ColumnSpacing="12">
+      <Border BackgroundColor="{Binding SelectedGroup.AvatarColor}" WidthRequest="56" HeightRequest="56" Padding="0" StrokeThickness="0"><Grid><Label Text="{Binding SelectedGroup.Initial}" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/><Image Source="{Binding SelectedGroup.AvatarPath}" Aspect="AspectFit" IsVisible="{Binding SelectedGroup.HasAvatar}"/></Grid></Border>
+      <VerticalStackLayout Grid.Column="1" Spacing="4"><Label Text="{Binding GroupTitle}" Style="{StaticResource ShellTitle}" MaxLines="2" LineBreakMode="TailTruncation"/><Label Text="{Binding TopicCount}" Style="{StaticResource ShellMuted}"/></VerticalStackLayout>
+     </Grid>
+     <Label Grid.Row="2" Text="เลือกหัวข้อเพื่อดูโพสต์" IsVisible="{Binding IsOverview}" Style="{StaticResource ShellText}"/>
+     <Grid Grid.Row="3" IsVisible="{Binding IsOverview}">
+      <CollectionView x:Name="OverviewList" Scrolled="OverviewListScrolled" Loaded="ShellListLoaded" ItemsSource="{Binding Topics}" SelectionMode="None">
+       <CollectionView.ItemsLayout><LinearItemsLayout Orientation="Vertical" ItemSpacing="4"/></CollectionView.ItemsLayout>
+       <CollectionView.ItemTemplate><DataTemplate x:DataType="core:TopicInfo"><Grid HeightRequest="48" Padding="12,0" ColumnDefinitions="28,*,20" BackgroundColor="White">
+        <Label Text="#" TextColor="{Binding IconTint}" FontSize="18" VerticalOptions="Center"/><Label Grid.Column="1" Text="{Binding Title}" Style="{StaticResource ShellText}" VerticalOptions="Center" MaxLines="1" LineBreakMode="TailTruncation"/><Label Grid.Column="2" Text="›" VerticalOptions="Center"/>
+        <Button Grid.ColumnSpan="3" Text="" BorderWidth="0" BackgroundColor="Transparent" Clicked="TopicButtonClicked" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Title}" ToolTipProperties.Text="{Binding Title}"/>
+       </Grid></DataTemplate></CollectionView.ItemTemplate>
+      </CollectionView>
+      <Label Text="ไม่พบหัวข้อที่แสดงได้" IsVisible="{Binding ShowTopicsEmpty}" Style="{StaticResource ShellMuted}" HorizontalOptions="Center" VerticalOptions="Center"/>
+     </Grid>
+     <Grid Grid.Row="1" IsVisible="{Binding IsPosts}" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+      <VerticalStackLayout Spacing="4"><Label Text="{Binding TopicTitle}" Style="{StaticResource ShellTitle}" MaxLines="1" LineBreakMode="TailTruncation" ToolTipProperties.Text="{Binding TopicTitle}"/><Label Text="{Binding LoadedLabel}" Style="{StaticResource ShellMuted}"/></VerticalStackLayout>
+      <VerticalStackLayout Grid.Column="1" Spacing="4"><Button Text="↻  อัปเดตโพสต์" Style="{StaticResource ShellButton}" Clicked="RefreshClicked" IsEnabled="{Binding IsReady}" HorizontalOptions="End"/><Label Text="{Binding SyncLabel}" Style="{StaticResource ShellMuted}" FontSize="11"/></VerticalStackLayout>
+     </Grid>
+     <Grid Grid.Row="2" IsVisible="{Binding IsPosts}" ColumnDefinitions="*,230" ColumnSpacing="12">
+      <SearchBar Text="{Binding PostQuery}" Placeholder="ค้นหาโพสต์ที่โหลดแล้ว…" Style="{StaticResource ShellSearch}"/>
+      <Picker Grid.Column="1" ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" SemanticProperties.Description="เรียงลำดับรายการที่แสดง" FontSize="13" HeightRequest="38" BackgroundColor="White"/>
+     </Grid>
+     <Grid Grid.Row="3" IsVisible="{Binding IsPosts}" RowDefinitions="*,Auto" RowSpacing="8">
+      <CollectionView x:Name="PostGrid" BackgroundColor="White" ItemsSource="{Binding Cards}" SelectionMode="None" SizeChanged="PostGridSizeChanged" Scrolled="PostGridScrolled">
+       <CollectionView.ItemsLayout><GridItemsLayout x:Name="PostLayout" Orientation="Vertical" Span="3" HorizontalItemSpacing="16" VerticalItemSpacing="16"/></CollectionView.ItemsLayout>
+       <CollectionView.ItemTemplate><DataTemplate x:DataType="vm:CardViewModel">
+        <views:MediaCardView Loaded="MediaCardLoaded" Unloaded="MediaCardUnloaded" OpenRequested="MediaCardOpened" LinkRequested="MediaCardLinkClicked"/>
+       </DataTemplate></CollectionView.ItemTemplate>
+      </CollectionView>
+      <VerticalStackLayout IsVisible="{Binding ShowMediaEmpty}" HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"><Label Text="ยังไม่มีโพสต์สื่อในหัวข้อนี้" Style="{StaticResource ShellText}"/></VerticalStackLayout>
+      <VerticalStackLayout IsVisible="{Binding ShowSearchEmpty}" HorizontalOptions="Center" VerticalOptions="Center" Spacing="12"><Label Text="ไม่พบโพสต์ที่ตรงกับคำค้น" Style="{StaticResource ShellText}"/><Button Text="ล้างคำค้น" Style="{StaticResource ShellButton}" Clicked="ClearPostSearchClicked"/></VerticalStackLayout>
+      <Grid Grid.Row="1" IsVisible="{Binding ShowPagination}" RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="4" Padding="0,8,0,0">
+       <Label Text="{Binding PageSummary}" Style="{StaticResource ShellMuted}" VerticalOptions="Center"/>
+       <HorizontalStackLayout Grid.Column="1" Spacing="8"><Picker ItemsSource="{Binding PageSizes}" SelectedItem="{Binding PageSize}" IsEnabled="{Binding IsReady}" SelectedIndexChanged="PageSizeChanged" WidthRequest="64" HeightRequest="38" FontSize="13"/><Label Text="ต่อหน้า" Style="{StaticResource ShellMuted}" VerticalOptions="Center"/></HorizontalStackLayout>
+       <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2" IsVisible="{Binding ShowPageNavigation}" HorizontalOptions="Center" Spacing="8">
+        <Button Text="‹ ก่อนหน้า" Style="{StaticResource ShellButton}" Clicked="PreviousClicked" IsEnabled="{Binding CanPrevious}" IsVisible="{Binding HasPreviousPage}"/>
+        <Label Text="{Binding PageLabel}" Style="{StaticResource ShellMuted}" VerticalOptions="Center"/>
+        <Button Text="ถัดไป ›" Style="{StaticResource ShellButton}" Clicked="NextClicked" IsEnabled="{Binding CanNext}" IsVisible="{Binding HasNextPage}"/>
+       </HorizontalStackLayout>
+      </Grid>
+     </Grid>
+     <VerticalStackLayout Grid.Row="3" IsVisible="{Binding ShowFirstLoading}" HorizontalOptions="Center" VerticalOptions="Center" Spacing="12">
+      <ActivityIndicator IsRunning="{Binding ShowFirstLoading}" Color="#087DFA"/>
+      <Label Text="{Binding LoadingText}" Style="{StaticResource ShellText}"/>
+      <Button Text="ยกเลิกการโหลด" Style="{StaticResource ShellButton}" Clicked="CancelClicked"/>
+     </VerticalStackLayout>
+     <VerticalStackLayout Grid.Row="3" IsVisible="{Binding ShowCanceled}" HorizontalOptions="Center" VerticalOptions="Center" Spacing="12"><Label Text="ยกเลิกการโหลดแล้ว" Style="{StaticResource ShellText}"/><Button Text="ลองใหม่" Style="{StaticResource ShellButton}" Clicked="RetryClicked"/></VerticalStackLayout>
+    </Grid>
+   </Grid>
+   <VerticalStackLayout Grid.Row="2">
+    <Grid IsVisible="{Binding ShowBusyStrip}" BackgroundColor="#EDF5FF" Padding="20,4" ColumnDefinitions="24,*,Auto" ColumnSpacing="12"><ActivityIndicator IsRunning="{Binding IsBusy}" Color="#087DFA"/><Label Grid.Column="1" Text="{Binding LoadingText}" Style="{StaticResource ShellText}" VerticalOptions="Center"/><Button Grid.Column="2" Text="ยกเลิกการโหลด" Style="{StaticResource ShellButton}" Clicked="CancelClicked"/></Grid>
+    <Grid IsVisible="{Binding HasError}" BackgroundColor="#FFF5E7" Padding="20,4" ColumnDefinitions="*,Auto" ColumnSpacing="12"><Label Text="{Binding Error}" TextColor="#805421" Style="{StaticResource ShellText}" VerticalOptions="Center" MaxLines="2"/><Button Grid.Column="1" Text="ลองใหม่" Style="{StaticResource ShellButton}" Clicked="RetryClicked" IsEnabled="{Binding IsReady}"/></Grid>
+   </VerticalStackLayout>
+  </Grid>
+
+ </Grid>
+</ContentPage>
