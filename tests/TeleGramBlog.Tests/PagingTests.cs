@@ -33,6 +33,34 @@ public class PagingTests
         var pager = new HistoryPager(new CancelSource(cts));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>pager.GetPageAsync(1,24,cts.Token));
     }
+    [Fact] public async Task TextModePaginatesPlainMessagesWithoutChangingGalleryDefault()
+    {
+        HistoryMessage[] messages = [M(5, eligible:false), M(4), M(3, eligible:false),
+            new(2, 0, DateTime.UnixEpoch, "  ", [], null)];
+        var pager = new HistoryPager(new Source(new HistoryBatch(messages, 2, true)), includeText:true);
+        var first = await pager.GetPageAsync(1, 2);
+        Assert.Equal(new[] {5,4}, first.Cards.Select(c=>c.Id));
+        Assert.True(first.HasNext);
+        var second = await pager.GetPageAsync(2, 2);
+        Assert.Equal("post 3", second.Cards.Single().Text);
+        Assert.Empty(second.Cards.Single().Media);
+        Assert.False(second.HasNext);
+        Assert.Equal(new[] {5,4}, (await pager.GetPageAsync(1, 2)).Cards.Select(c=>c.Id));
+        var gallery = await new HistoryPager(new Source(new HistoryBatch(messages, 2, true))).GetPageAsync(1, 2);
+        Assert.Equal(4, gallery.Cards.Single().Id);
+    }
+    [Fact] public async Task MediaOnlyFillsPagesSkippingLinksAndKeepsNewestFirst()
+    {
+        var link = new HistoryMessage(11, 0, DateTime.UnixEpoch, "link", ["https://example.com"], null);
+        var pager = new HistoryPager(new Source(new([link, M(10), M(9, eligible:false)], 9, false),
+            new([M(8), M(7)], 7, true)), mediaOnly:true);
+        var first = await pager.GetPageAsync(1, 2);
+        Assert.Equal(new[] {10,8}, first.Cards.Select(c=>c.Id));
+        Assert.True(first.HasNext);
+        var second = await pager.GetPageAsync(2, 2);
+        Assert.Equal(7, second.Cards.Single().Id);
+        Assert.False(second.HasNext);
+    }
     sealed class CancelSource(CancellationTokenSource cts):IHistorySource
     {
         public Task<HistoryBatch> FetchAsync(int beforeId,CancellationToken ct) { cts.Cancel(); return Task.FromResult(new HistoryBatch([M(10)],10,true)); }

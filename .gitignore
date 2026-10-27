@@ -22,3 +22,6 @@ telegram.json
 *.mobileprovision
 scripts/login-ui.json
 scripts/preview-ui.json
+
+# Local browser test tooling
+node_modules/

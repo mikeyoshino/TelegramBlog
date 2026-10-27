@@ -1,4 +1,4 @@
-param([string]$OutputDirectory = 'artifacts/TeleGramBlog-1.7.2-win-x64')
+param([string]$OutputDirectory = 'artifacts/TeleBlog-2.0-win-x64')
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path $PSScriptRoot -Parent
 Push-Location $projectRoot

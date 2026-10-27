@@ -2,6 +2,8 @@ namespace TeleGramBlog.Core;
 
 public record GroupInfo(long Id, string Title, bool IsForum, string? Username = null):System.ComponentModel.INotifyPropertyChanged
 {
+    public int? UnreadCount { get; init; }
+    public DateTime? LastMessageAt { get; init; }
     string? avatarPath;
     int? knownTopicCount;
     public int? KnownTopicCount {get=>knownTopicCount;set{knownTopicCount=value;PropertyChanged?.Invoke(this,new(nameof(GroupMeta)));}}

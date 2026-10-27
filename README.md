@@ -1,12 +1,39 @@
 # TeleGramBlog
 
-Windows desktop viewer built with .NET 10 MAUI. Connect your own Telegram account, browse joined groups and forum Topics, and view historical photos and links in a clean white/blue paginated grid.
+TeleBlog is a Windows/iOS Telegram media viewer built with .NET 10 MAUI. The Windows 2.0 shell now shares the current iOS UI and behavior, with desktop navigation, a wide media viewer, context menus, SQLite collections/notes and saved-content search. It runs locally in MAUI HybridWebView; no web server is required.
+
+See [desktop parity, build instructions and validation limits](docs/verification/desktop-ios-parity.md). Existing Windows sessions/configuration retain their storage paths. Favorites and collections are device-local; they are not automatically synced between iPhone and Windows.
+
+The Windows 2.0 code and desktop browser layout have been updated on macOS. A Windows build/run is still required before distributing an EXE. Older 1.7.x artifacts and native-XAML verification notes below describe the legacy shell, available explicitly with `--legacy-ui`.
 
 Continuing on a Mac? See the [iOS development handoff](docs/IOS-HANDOFF.md) and
-[Luma mobile UI reference](docs/design/luma-mobile.html). The current app is Windows-only;
-the iOS implementation is pending.
+[Luma mobile UI reference](docs/design/luma-mobile.html). A separate iOS app is available in `src/TeleGramBlog.iOS`, following the Luma
+reference as its mobile presentation. It migrates the desktop behavior by sharing
+the existing `MainViewModel`, Core and Telegram projects; iOS replaces only the
+platform integrations and UI. Build its target independently from the Windows
+solution; see the [migration mapping](docs/verification/ios-desktop-migration.md).
 
-## เปิดใช้งาน
+## iOS / Luma
+
+On an Apple Silicon Mac with .NET 10 MAUI, compatible Xcode and a booted iPhone
+Simulator:
+
+```sh
+./scripts/run-ios.sh --design-preview
+```
+
+Omit `--design-preview` for the welcome/login screen. The mobile UI follows Luma while preserving desktop group/topic navigation,
+24/48-post paging, remembered pages/search, cached-history fallback, QR/phone login
+and on-demand video ranges. The same desktop `MainViewModel` drives browsing;
+AVPlayer reads from the existing `ChunkedMediaSource`. Telegram login requires an application-owner
+`telegram.json` at the repository root before building. Never commit that file.
+Physical iPhones require Apple signing. See [iOS setup and limits](docs/IOS-HANDOFF.md).
+
+## Windows 2.0
+
+Build on Windows using `scripts/publish.ps1`, then launch `artifacts/TeleBlog-2.0-win-x64/TeleGramBlog.App.exe`. Use `--design-preview` only for sample content. Normal launch restores the real Telegram account or offers QR/phone login. The app requires WebView2 Runtime.
+
+## เปิดใช้งานเวอร์ชันเดิม 1.7.x
 
 1. เปิด `artifacts/TeleGramBlog-1.7.2-win-x64/TeleGramBlog.App.exe` โดยเก็บไฟล์ทั้งหมดในโฟลเดอร์ไว้ด้วยกัน ไม่ใช่ EXE เดี่ยว
 2. ทดลองหน้าตาได้ทันทีด้วย **Explore the design preview** ข้อมูลในโหมดนี้เป็นตัวอย่าง ไม่ได้เชื่อม Telegram
@@ -41,7 +68,7 @@ Alternatively set `TELEGRAM_API_ID` and `TELEGRAM_API_HASH`. Existing protected 
 
 ## Build and test
 
-Prerequisites: Windows x64, .NET 10 SDK, `maui-windows` workload, Windows SDK. Native MAUI XAML; no web server.
+Prerequisites: Windows x64, .NET 10 SDK, `maui-windows` workload, Windows SDK. MAUI HybridWebView with WebView2; no web server. The original native XAML shell remains only for explicit legacy diagnostics.
 
 ```powershell
 dotnet restore TeleGramBlog.slnx

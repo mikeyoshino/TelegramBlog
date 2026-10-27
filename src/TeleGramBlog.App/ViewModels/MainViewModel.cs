@@ -41,6 +41,9 @@ public sealed class CardViewModel(PostCard post) : Observable
 public sealed class MainViewModel : Observable, IDisposable
 {
     public ObservableCollection<GroupInfo> Groups {get;}=[];
+    public bool IncludeTextMessages { get; init; }
+    public bool MediaOnly { get; init; }
+    public bool PrefetchThumbnails { get; init; } = true;
     public ObservableCollection<GroupInfo> RailGroups {get;}=[];
     public ObservableCollection<TopicInfo> Topics {get;}=[];
     public ObservableCollection<CardViewModel> Cards {get;}=[];
@@ -175,6 +178,21 @@ public sealed class MainViewModel : Observable, IDisposable
     public int PageSize {get=>pageSize;set {if(busy||pageSize==value)return;pageSize=value;rememberedPages.Clear();Changed();}}
     List<CardViewModel> currentCards=[];
     public TelegramService? Service=>service;
+    // Read-only state for the iOS presentation adapter; the desktop remains the source of behavior.
+    public int CurrentPage=>page;
+    public int KnownPages=>knownPages;
+    public bool IsCached=>cached;
+    public DateTimeOffset? HistoryFetchedAt=>pager?.FetchedAt;
+    public async Task UseConnectedServiceAsync(TelegramService connectedService, bool loadGroups = true)
+    {
+        if(connectedService.AccountId==0)throw new InvalidOperationException("Authenticate before opening the workspace.");
+        if(service!=null&&service!=connectedService)throw new InvalidOperationException("Disconnect the previous account first.");
+        service=connectedService;connected=true;showGroups=true;demo=false;initialized=true;
+        busy=true;error="";AllChanged();
+        try{if(loadGroups)await LoadGroupsAsync(navigation.Next());}
+        catch(Exception e){error=ExplainShell(e);}
+        finally{busy=false;AllChanged();}
+    }
 
     static void Replace<T>(ObservableCollection<T> target,IEnumerable<T> source) {target.Clear();foreach(var item in source)target.Add(item);}
     void FilterGroups(){Replace(Groups,allGroups.Where(g=>g.Title.Contains(groupQuery,StringComparison.CurrentCultureIgnoreCase)));AllChanged();}
@@ -351,7 +369,7 @@ public sealed class MainViewModel : Observable, IDisposable
         {
             var snapshot=!demo && !refresh && oldPager==null?service!.Store.ReadHistory(service.AccountId,SelectedGroup.Id,topic.Id):null;
             cached=snapshot!=null||(!refresh&&oldPager!=null);
-            pager=!refresh&&oldPager!=null?oldPager:new(historySourceFactory?.Invoke(SelectedGroup,topic)??(demo?new DemoHistorySource():service!.CreateHistorySource(SelectedGroup,topic)),snapshot);
+            pager=!refresh&&oldPager!=null?oldPager:new(historySourceFactory?.Invoke(SelectedGroup,topic)??(demo?new DemoHistorySource():service!.CreateHistorySource(SelectedGroup,topic)),snapshot,IncludeTextMessages,MediaOnly);
             var cachedPage=(snapshot!=null||!refresh?pager:oldPager)?.GetCachedPage(targetPage,pageSize);
             if(cachedPage!=null)DisplayPage(cachedPage,ct);
             status=demo?"Preview mode · sample posts":snapshot==null?"Loading history…":"Cached history · Sync to check for updates";
@@ -407,6 +425,7 @@ public sealed class MainViewModel : Observable, IDisposable
     }
     async Task LoadThumbnailsAsync(CardViewModel[] cards,CancellationToken ct)
     {
+        if(!PrefetchThumbnails)return;
         await Task.WhenAll(cards.Select(async card=>{
             try {if(card.Post.Media.FirstOrDefault() is {} media && service!=null){var path=await service.GetMediaAsync(media,false,ct);if(navigation.IsCurrent(ct))card.ImagePath=path;}}
             catch(Exception) { /* Missing media retains the explicit placeholder. */ }

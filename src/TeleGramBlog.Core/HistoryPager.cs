@@ -1,5 +1,5 @@
 namespace TeleGramBlog.Core;
-public sealed class HistoryPager(IHistorySource source, HistorySnapshot? snapshot = null)
+public sealed class HistoryPager(IHistorySource source, HistorySnapshot? snapshot = null, bool includeText = false, bool mediaOnly = false)
 {
     readonly SemaphoreSlim gate = new(1);
     readonly Dictionary<int, HistoryMessage> messages = (snapshot?.Messages ?? []).ToDictionary(m=>m.Id);
@@ -53,6 +53,6 @@ public sealed class HistoryPager(IHistorySource source, HistorySnapshot? snapsho
             .Select(g=>new PostCard(g.First().Id,g.First().Date,
                 string.Join("\n",g.Select(m=>m.Text).Where(t=>!string.IsNullOrWhiteSpace(t)).Distinct()),
                 g.SelectMany(m=>m.Links).Distinct().ToArray(),g.Where(m=>m.Media != null).OrderBy(m=>m.Id).Select(m=>m.Media!).ToArray()))
-            .Where(p=>p.Media.Count>0 || p.Links.Count>0).ToList();
+            .Where(p=>p.Media.Count>0 || !mediaOnly && (p.Links.Count>0 || includeText && !string.IsNullOrWhiteSpace(p.Text))).ToList();
     }
 }

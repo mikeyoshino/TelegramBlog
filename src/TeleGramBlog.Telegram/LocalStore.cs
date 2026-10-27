@@ -4,7 +4,7 @@ namespace TeleGramBlog.Telegram;
 public sealed class LocalStore(string root)
 {
     public string Root {get;}=root;
-    public bool ClearLocalData(ProtectedSessionStore session)
+    public bool ClearLocalData(ISessionStore session)
     {
         var success=true;
         try {session.Clear();} catch(Exception e) when(e is IOException or UnauthorizedAccessException){success=false;}

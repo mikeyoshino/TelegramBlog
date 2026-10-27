@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 namespace TeleGramBlog.Telegram;
-public sealed class ProtectedSessionStore(string path)
+public sealed class ProtectedSessionStore(string path) : ISessionStore
 {
     readonly object gate=new();
     public byte[]? Load()

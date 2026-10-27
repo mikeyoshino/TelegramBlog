@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "node --test *.test.mjs",
+    "test:ui": "node ui-check.cjs && node auth-check.cjs && node cleanup-check.cjs && node migration-check.cjs && node qr-check.cjs && node resume-check.cjs && node groups-check.cjs && node inline-video-check.cjs && node media-loading-check.cjs && node foreground-check.cjs && node viewer-switch-check.cjs && node single-column-check.cjs && node collections-check.cjs && node save-category-check.cjs && node startup-logo-check.cjs && node saved-context-check.cjs && node modal-overlay-check.cjs && node unread-isolation-check.cjs && node quiet-ui-check.cjs && node message-context-check.cjs && node collection-input-check.cjs && node double-tap-check.cjs && node saved-search-check.cjs && node desktop-check.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

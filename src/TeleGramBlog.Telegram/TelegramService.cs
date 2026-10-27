@@ -12,13 +12,15 @@ public sealed record LogoutResult(bool RemoteRevoked,bool LocalCleared);
 public sealed class TelegramService : IDisposable
 {
     readonly Client client;
-    readonly ProtectedSessionStore session;
+    readonly ISessionStore session;
     readonly Dictionary<long,ChatBase> chats=[];
     readonly SemaphoreSlim mediaGate=new(3);
     readonly TelegramRequestGate requests=new();
     readonly CancellationTokenSource lifetime=new();
     readonly object logoutGate=new();
     Task<LogoutResult>? logoutTask;
+    readonly object reconnectGate = new();
+    Task? transportReset;
     Func<Task<string>>? qrPassword;
     PhoneLoginFlow? phoneLogin;
     string phoneNumber="";
@@ -26,15 +28,15 @@ public sealed class TelegramService : IDisposable
     public long AccountId=>client.User?.id ?? 0;
     public string AccountName=>client.User?.first_name ?? "Telegram";
     public bool HasSession=>client.UserId!=0;
-    public TelegramService(TelegramConfig config,string root)
+    public TelegramService(TelegramConfig config,string root,ISessionStore? sessionStore=null,string deviceModel="TeleGramBlog Desktop")
     {
         if(!config.IsValid) throw new ArgumentException("Enter a valid Telegram API ID and 32-character API hash.");
-        Store=new(root); session=new(Path.Combine(root,"account.session"));
+        Store=new(root); session=sessionStore??new ProtectedSessionStore(Path.Combine(root,"account.session"));
         Helpers.Log=(_,_)=>{};
         var saved=session.Load();
         client=new Client(key=>key switch {
             "api_id"=>config.ApiId.ToString(), "api_hash"=>config.ApiHash,
-            "device_model"=>"TeleGramBlog Desktop", "app_version"=>"1.1", "user_id"=>"-1",
+            "device_model"=>deviceModel, "app_version"=>"1.1", "user_id"=>"-1",
             "phone_number"=>phoneNumber,
             "password" when qrPassword!=null=>qrPassword().GetAwaiter().GetResult(),
             "verification_code" or "password" or "email" or "email_verification_code" when phoneLogin!=null=>phoneLogin.RequestInputAsync(key).GetAwaiter().GetResult(),
@@ -51,14 +53,36 @@ public sealed class TelegramService : IDisposable
         }
         return phoneLogin.AdvanceAsync(input);
     }
+    public async Task ResumeSessionAsync()
+    {
+        if(!HasSession)throw new InvalidOperationException("No authenticated session is available.");
+        // A failed network request must never fall through to logout or a fresh code request.
+        await client.LoginUserIfNeeded(reloginOnFailedResume:false);
+    }
+    public async Task ReconnectSessionAsync(CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        if(!HasSession)throw new InvalidOperationException("No authenticated session is available.");
+        // iOS may suspend sockets while locked. Retain account/auth keys and reopen transport/DC connections.
+        Task reset;
+        lock(reconnectGate)reset = transportReset ??= client.ResetAsync(resetUser:false, resetSessions:true);
+        try { await reset.WaitAsync(ct); }
+        finally
+        {
+            lock(reconnectGate)
+                if(reset.IsCompleted && ReferenceEquals(reset, transportReset))transportReset = null;
+        }
+        ct.ThrowIfCancellationRequested();
+        await ResumeSessionAsync().WaitAsync(ct);
+    }
     public async Task LoginWithQrAsync(Action<string> showQr,Func<CancellationToken,Task<string>> requestPassword,CancellationToken ct)
     {
         qrPassword=()=>requestPassword(ct);
         try{await client.LoginWithQRCode(showQr,logoutFirst:false,ct:ct);ct.ThrowIfCancellationRequested();}
         finally{qrPassword=null;}
     }
-    public Task<IReadOnlyList<GroupInfo>> GetGroupsAsync(CancellationToken ct)=>requests.RunAsync(()=>GetGroupsCoreAsync(ct),ct,true);
-    async Task<IReadOnlyList<GroupInfo>> GetGroupsCoreAsync(CancellationToken ct)
+    public Task<IReadOnlyList<GroupInfo>> GetGroupsAsync(CancellationToken ct, bool includeForumUnread = true)=>requests.RunAsync(()=>GetGroupsCoreAsync(ct,includeForumUnread),ct,true);
+    async Task<IReadOnlyList<GroupInfo>> GetGroupsCoreAsync(CancellationToken ct, bool includeForumUnread)
     {
         var all=await client.Messages_GetAllDialogs().WaitAsync(ct);
         ct.ThrowIfCancellationRequested(); chats.Clear();
@@ -70,21 +94,79 @@ public sealed class TelegramService : IDisposable
             else if(c is Chat group && !group.flags.HasFlag(Chat.Flags.left) && !group.flags.HasFlag(Chat.Flags.deactivated))
             { chats[-group.id]=group; result.Add(new(-group.id,group.title,false)); }
         }
-        return result.OrderBy(g=>g.Title,StringComparer.CurrentCultureIgnoreCase).ToArray();
+        var dialogs = all.dialogs.OfType<Dialog>().Where(d => d.peer is PeerChannel or PeerChat).ToDictionary(d => GroupPeerId(d.peer));
+        var messages = all.messages.Where(m => m.Peer != null)
+            .GroupBy(m => (GroupPeerId(m.Peer), m.ID)).ToDictionary(g => g.Key, g => g.First());
+        var enriched = new List<GroupInfo>();
+        foreach(var g in result)
+        {
+            if(!dialogs.TryGetValue(g.Id, out var dialog)) { enriched.Add(g); continue; }
+            int? unread = g.IsForum ? null
+                : UnreadSnapshot.Count(dialog.unread_count, dialog.read_inbox_max_id, dialog.top_message);
+            enriched.Add(g with { UnreadCount = unread,
+                LastMessageAt = messages.TryGetValue((g.Id, dialog.top_message), out var latest) ? latest.Date : null });
+        }
+        if(includeForumUnread)
+        {
+            var counts = await GetForumUnreadCountsAsync(enriched.Where(g=>g.IsForum).Select(g=>g.Id),ct);
+            enriched = enriched.Select(g=>g.IsForum ? g with { UnreadCount = counts.GetValueOrDefault(g.Id) } : g).ToList();
+        }
+        return enriched.OrderBy(g=>g.Title,StringComparer.CurrentCultureIgnoreCase).ToArray();
     }
+    public async Task<IReadOnlyDictionary<long,int?>> GetForumUnreadCountsAsync(IEnumerable<long> groupIds, CancellationToken ct)
+    {
+        var result = groupIds.Distinct().ToDictionary(id=>id,_=>(int?)null);
+        using var budget = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        budget.CancelAfter(TimeSpan.FromSeconds(15));
+        foreach(var id in result.Keys.ToArray())
+        {
+            ct.ThrowIfCancellationRequested();
+            if(budget.IsCancellationRequested)break;
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(budget.Token);
+            timeout.CancelAfter(TimeSpan.FromSeconds(4));
+            try { result[id] = await requests.RunAsync(()=>GetForumUnreadCountAsync(id,timeout.Token),timeout.Token,true); }
+            catch(OperationCanceledException) when(!ct.IsCancellationRequested) { }
+            catch(RpcException e) when(TelegramRequestGate.IsFlood(e)) { break; }
+            catch(Exception e) when(e is IOException or RpcException or InvalidOperationException or OverflowException or TimeoutException) { }
+        }
+        ct.ThrowIfCancellationRequested();
+        return result;
+    }
+    // Forum read positions belong to individual topics, not the parent dialog.
+    async Task<int> GetForumUnreadCountAsync(long groupId, CancellationToken ct)
+    {
+        var snapshot = new UnreadSnapshot();
+        var visited = new HashSet<(int,int)>();
+        DateTime offsetDate = default;
+        int offsetId = 0, offsetTopic = 0;
+        while(true)
+        {
+            // The caller applies pacing and a bounded timeout for this optional count.
+            var response = await client.Messages_GetForumTopics(Peer(groupId), offsetDate, offsetId, offsetTopic, 100).WaitAsync(ct);
+            var batch = response.topics.OfType<ForumTopic>().ToArray();
+            snapshot.Add(batch);
+            if(snapshot.TopicCount >= response.count || batch.Length == 0) return snapshot.Complete(response.count);
+            var last = batch[^1];
+            if(!visited.Add((last.id,last.top_message))) throw new IOException("Topic read states did not advance. Retry refreshing groups.");
+            offsetId = last.top_message;
+            offsetTopic = last.id;
+            offsetDate = response.flags.HasFlag(Messages_ForumTopics.Flags.order_by_create_date) ? last.date
+                : response.messages.FirstOrDefault(m => m.ID == last.top_message)?.Date ?? last.date;
+        }
+    }
+    static long GroupPeerId(Peer peer) => peer switch { PeerChannel c => c.channel_id, PeerChat c => -c.chat_id, _ => 0 };
     internal InputPeer Peer(long id)=>chats.TryGetValue(id,out var chat)?chat.ToInputPeer():throw new InvalidOperationException("Select the group again to reconnect.");
     public async Task<string?> GetGroupAvatarAsync(long id,CancellationToken ct)
     {
         using var linked=CancellationTokenSource.CreateLinkedTokenSource(ct,lifetime.Token);ct=linked.Token;
         if(!chats.TryGetValue(id,out var chat)||chat.Photo==null)return null;
-        var path=Path.Combine(Store.AccountPath(AccountId),"media",$"avatar_{id}_{chat.Photo.photo_id}.jpg");
+        var path=Path.Combine(Store.AccountPath(AccountId),"media",$"avatar_full_{id}_{chat.Photo.photo_id}.jpg");
         if(File.Exists(path))return path;
         await mediaGate.WaitAsync(ct);
         try
         {
             using var stream=new MemoryStream();
-            await client.DownloadProfilePhotoAsync(chat,stream,miniThumb:true);
-            if(stream.Length==0)await requests.RunAsync(()=>client.DownloadProfilePhotoAsync(chat,stream),ct,true);
+            await requests.RunAsync(()=>client.DownloadProfilePhotoAsync(chat,stream),ct,true);
             ct.ThrowIfCancellationRequested();if(stream.Length==0)return null;
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);await File.WriteAllBytesAsync(path,stream.ToArray(),ct);return path;
         }
@@ -94,13 +176,18 @@ public sealed class TelegramService : IDisposable
     {
         if(!group.IsForum) return [new(0,"All posts")];
         var topics=new Dictionary<int,TopicInfo>();
+        var latestMessageIds=new Dictionary<int,int>();
         DateTime offsetDate=default; int offsetId=0,offsetTopic=0;
         while(true)
         {
             var response=await requests.RunAsync(()=>client.Messages_GetForumTopics(Peer(group.Id),offsetDate,offsetId,offsetTopic,100).WaitAsync(ct),ct,true);
             var batch=response.topics.OfType<ForumTopic>().ToArray();
             if(batch.Length==0) break;
-            foreach(var t in batch) topics[t.id]=new(t.id,t.title,t.icon_color);
+            foreach(var t in batch)
+            {
+                topics[t.id]=new(t.id,t.title,t.icon_color);
+                latestMessageIds[t.id]=t.top_message;
+            }
             var last=batch[^1];
             if(last.id==offsetTopic) throw new InvalidOperationException("Topic list did not advance. Retry loading this group.");
             offsetId=last.top_message; offsetTopic=last.id;
@@ -108,10 +195,18 @@ public sealed class TelegramService : IDisposable
                 response.messages.FirstOrDefault(m=>m.ID==last.top_message)?.Date ?? last.date;
             if(topics.Count>=response.count) break;
         }
-        return topics.Values.OrderBy(t=>t.Id==1?0:1).ThenBy(t=>t.Title).ToArray();
+        // Message IDs increase within this group: order by the latest post, not topic name or pinning.
+        return topics.Values.OrderByDescending(t=>latestMessageIds[t.Id]).ThenBy(t=>t.Title).ToArray();
     }
     public IHistorySource CreateHistorySource(GroupInfo group,TopicInfo? topic)=>new TelegramHistorySource(client,Peer(group.Id),group,topic,requests);
-    public Task<string?> GetMediaAsync(MediaRef media,bool fullSize,CancellationToken ct)=>requests.RunAsync(()=>GetMediaCoreAsync(media,fullSize,ct),ct);
+    public Task<string?> GetMediaAsync(MediaRef media,bool fullSize,CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        var cached = Path.Combine(Store.AccountPath(AccountId), "media", $"{media.ChatId}_{media.MessageId}_{(fullSize ? "full" : "thumb")}.jpg");
+        // Cache hits do not wait behind downloads or network cooldowns.
+        if(AccountId != 0 && File.Exists(cached)) return Task.FromResult<string?>(cached);
+        return requests.RunAsync(()=>GetMediaCoreAsync(media,fullSize,ct),ct);
+    }
     async Task<string?> GetMediaCoreAsync(MediaRef media,bool fullSize,CancellationToken ct)
     {
         using var linked=CancellationTokenSource.CreateLinkedTokenSource(ct,lifetime.Token);
@@ -140,6 +235,8 @@ public sealed class TelegramService : IDisposable
                 var size=doc.thumbs?.OfType<PhotoSize>().OrderByDescending(s=>s.w*s.h).FirstOrDefault();
                 if(fullSize && media.Kind=="image" && doc.size<=20*1024*1024) await client.DownloadFileAsync(doc,stream);
                 else if(size!=null) await client.DownloadFileAsync(doc,stream,size);
+                else if(doc.thumbs?.OfType<PhotoCachedSize>().OrderByDescending(t=>t.w*t.h).FirstOrDefault() is {} cached)
+                    await stream.WriteAsync(cached.bytes, ct);
                 else return null;
             }
             else return null;

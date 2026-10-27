@@ -5,19 +5,29 @@
     <RootNamespace>TeleGramBlog.App</RootNamespace>
     <UseMaui>true</UseMaui><SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
-    <ApplicationTitle>TeleGramBlog</ApplicationTitle>
+    <ApplicationTitle>TeleBlog</ApplicationTitle>
     <ApplicationId>app.telegramblog.desktop</ApplicationId>
-    <ApplicationDisplayVersion>1.7.2</ApplicationDisplayVersion><ApplicationVersion>11</ApplicationVersion>
+    <ApplicationDisplayVersion>2.0.0</ApplicationDisplayVersion><ApplicationVersion>12</ApplicationVersion>
     <WindowsPackageType>None</WindowsPackageType>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <PublishReadyToRun>false</PublishReadyToRun>
-    <MauiVersion>10.0.1</MauiVersion>
+    <MauiVersion>10.0.20</MauiVersion>
   </PropertyGroup>
   <ItemGroup>
-    <MauiIcon Include="Resources/AppIcon/appicon.svg" Color="#087DFA" />
-    <MauiSplashScreen Include="Resources/Splash/splash.svg" Color="#F5FAFF" BaseSize="128,128" />
+    <Compile Include="../TeleGramBlog.iOS/MainPage.cs" Link="Shared/HybridPage.cs" />
+    <Compile Include="../TeleGramBlog.iOS/Services/MobileBackend.cs" Link="Shared/MobileBackend.cs" />
+    <Compile Include="../TeleGramBlog.iOS/Services/RuntimePlatform.cs" Link="Shared/RuntimePlatform.cs" />
+    <Compile Include="../TeleGramBlog.iOS/Services/MobileModels.cs" Link="Shared/MobileModels.cs" />
+    <Compile Include="../TeleGramBlog.iOS/Services/SqliteFavoritesStore.cs" Link="Shared/SqliteFavoritesStore.cs" />
+    <Compile Include="../TeleGramBlog.iOS/Services/LifecycleDiagnostics.cs" Link="Shared/LifecycleDiagnostics.cs" />
+    <MauiAsset Include="../../telegram.json" LogicalName="telegram.json" Condition="Exists('../../telegram.json')" />
+    <MauiAsset Include="../TeleGramBlog.iOS/Resources/Raw/wwwroot/**" LogicalName="wwwroot/%(RecursiveDir)%(Filename)%(Extension)" />
+    <PackageReference Include="sqlite-net-base" Version="1.9.172" />
+    <PackageReference Include="SQLitePCLRaw.provider.winsqlite3" Version="2.1.11" />
+    <MauiIcon Include="../TeleGramBlog.iOS/Resources/teleblog_icon.svg" Color="#1686FA" />
+    <MauiSplashScreen Include="../TeleGramBlog.iOS/Resources/teleblog_splash.svg" Color="#FFFFFF" BaseSize="100,100" />
     <MauiImage Include="Resources/Images/*" />
     <MauiFont Include="Resources/Fonts/*" />
     <MauiAsset Include="Resources/Raw/**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />

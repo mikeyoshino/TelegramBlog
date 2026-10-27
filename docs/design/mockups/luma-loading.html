@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Luma · Loading mock</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#fff}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#101114;overflow:hidden}.screen{height:100dvh;position:relative;background:#fff}.statusbar{position:absolute;top:21px;left:32px;right:28px;display:flex;justify-content:space-between;align-items:center;height:25px}.time{font-size:18px;font-weight:650;letter-spacing:-.4px}.indicators{display:flex;align-items:center;gap:7px}.battery{height:15px;width:28px;border:1px solid #c8cbd0;border-radius:4px;position:relative;padding:2px}.battery:before{content:"";position:absolute;right:-3px;top:4px;width:2px;height:5px;background:#b8bdc4;border-radius:1px}.battery:after{content:"";display:block;width:91%;height:100%;border-radius:2px;background:#101114}.loading{position:absolute;inset:0;display:grid;place-items:center}.mark{width:132px;height:132px;display:grid;place-items:center;position:relative}.track,.orbit{position:absolute;inset:0;border-radius:50%;border:2px solid #edf5fd}.orbit{border-color:transparent;border-top-color:#208cf8;border-right-color:#b8ddff;animation:orbit 1.7s linear infinite;transform:rotate(-35deg)}.logo{width:88px;height:88px;border-radius:26px;display:grid;place-items:center;background:linear-gradient(145deg,#4bb6ff,#087cf4);box-shadow:0 9px 24px #1686fa19;animation:breathe 2.8s ease-in-out infinite}.logo svg{width:48px;height:48px;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none}.home{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);height:5px;width:142px;background:#101114;border-radius:4px}@keyframes orbit{to{transform:rotate(325deg)}}@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(.965)}}@media(prefers-reduced-motion:reduce){.orbit,.logo{animation:none}}
+</style>
+</head>
+<body>
+<main class="screen">
+<div class="statusbar" aria-hidden="true"><span class="time">22:27</span><span class="indicators"><svg width="19" height="16" viewBox="0 0 19 16" fill="currentColor"><rect x="0" y="10" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="9" rx="1"/><rect x="10" y="3" width="3" height="13" rx="1"/><rect x="15" width="3" height="16" rx="1"/></svg><svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 4q8-6 16 0M5 8q5-4 10 0M8 12q2-2 4 0"/><circle cx="10" cy="15" r=".6" fill="currentColor" stroke="none"/></svg><span class="battery"></span></span></div>
+<section class="loading" role="status" aria-label="กำลังเชื่อมต่อบัญชีเดิม">
+<div class="mark"><div class="track"></div><div class="orbit"></div><div class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2.4"/><rect x="14" y="3" width="7" height="7" rx="2.4"/><rect x="3" y="14" width="7" height="7" rx="2.4"/><path d="M17.5 13v9m-4.5-4.5h9"/></svg></div></div>
+</section>
+<div class="home" aria-hidden="true"></div>
+</main>
+</body>
+</html>

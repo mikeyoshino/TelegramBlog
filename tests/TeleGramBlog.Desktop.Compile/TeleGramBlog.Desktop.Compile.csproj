@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<PropertyGroup>
+<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+<EnableWindowsTargeting>true</EnableWindowsTargeting>
+<ImplicitUsings>enable</ImplicitUsings>
+<Nullable>enable</Nullable>
+<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+<UseWinUI>true</UseWinUI>
+<WindowsPackageType>None</WindowsPackageType>
+<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+</PropertyGroup>
+<ItemGroup>
+<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20"/>
+<PackageReference Include="sqlite-net-base" Version="1.9.172"/>
+<PackageReference Include="SQLitePCLRaw.provider.winsqlite3" Version="2.1.11"/>
+<Compile Include="../../src/TeleGramBlog.iOS/MainPage.cs"/>
+<Compile Include="../../src/TeleGramBlog.iOS/Services/MobileBackend.cs"/>
+<Compile Include="../../src/TeleGramBlog.iOS/Services/RuntimePlatform.cs"/>
+<Compile Include="../../src/TeleGramBlog.iOS/Services/MobileModels.cs"/>
+<Compile Include="../../src/TeleGramBlog.iOS/Services/SqliteFavoritesStore.cs"/>
+<Compile Include="../../src/TeleGramBlog.iOS/Services/LifecycleDiagnostics.cs"/>
+<Compile Include="../../src/TeleGramBlog.App/ViewModels/MainViewModel.cs"/>
+<Compile Include="../../src/TeleGramBlog.App/Platforms/Windows/HybridNativeMedia.cs"/>
+<Compile Include="../../src/TeleGramBlog.App/Platforms/Windows/DesktopFileExport.cs"/>
+<Compile Include="../../src/TeleGramBlog.App/Platforms/Windows/VideoRandomAccessStream.cs"/>
+<Compile Include="GlobalUsings.cs"/>
+<ProjectReference Include="../../src/TeleGramBlog.Core/TeleGramBlog.Core.csproj"/>
+<ProjectReference Include="../../src/TeleGramBlog.Telegram/TeleGramBlog.Telegram.csproj"/>
+</ItemGroup>
+</Project>
